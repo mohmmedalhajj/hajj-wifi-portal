@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -17,10 +18,22 @@ import {
   Search,
   PlusCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  RefreshCcw, // Added for reactivation
+  Check,
+  X
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Sidebar,
   SidebarContent,
@@ -37,7 +50,7 @@ import {
 const CardManagementContent = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { cards, addCard } = useCards();
+  const { cards, addCard, logoutCard, reactivateCard } = useCards();
   const { toast } = useToast();
   
   const [cardValue, setCardValue] = useState<"200" | "500" | "1000">("200");
@@ -47,6 +60,8 @@ const CardManagementContent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [autoGenerateEnabled, setAutoGenerateEnabled] = useState(false);
   const [autoGenerateInterval, setAutoGenerateInterval] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const cardsPerPage = 10;
 
   const handleLogout = () => {
     logout();
@@ -126,16 +141,85 @@ const CardManagementContent = () => {
     });
   };
 
+  // Handle card logout
+  const handleCardLogout = (serialNumber: string) => {
+    const result = logoutCard(serialNumber);
+    if (result) {
+      toast({
+        title: "تم تسجيل الخروج",
+        description: `تم تسجيل خروج الكرت ${serialNumber} بنجاح. يمكن إعادة استخدامه لاحقاً`,
+      });
+    }
+  };
+
+  // Handle card reactivation
+  const handleCardReactivate = (serialNumber: string) => {
+    const result = reactivateCard(serialNumber);
+    if (result) {
+      toast({
+        title: "تم إعادة تفعيل الكرت",
+        description: `تم إعادة تفعيل الكرت ${serialNumber} بنجاح`,
+      });
+    } else {
+      toast({
+        title: "فشل إعادة التفعيل",
+        description: "لا يمكن إعادة تفعيل هذا الكرت",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Get status text and styling for a card
+  const getCardStatusInfo = (card: CardType) => {
+    if (card.isActive) {
+      return {
+        text: "مفعّل",
+        className: "bg-emerald-100 text-emerald-800"
+      };
+    } else if (card.remainingTime && card.remainingTime > 0) {
+      return {
+        text: "متوقف مؤقتًا",
+        className: "bg-amber-100 text-amber-800"
+      };
+    } else {
+      return {
+        text: "غير مفعّل",
+        className: "bg-slate-100 text-slate-800"
+      };
+    }
+  };
+
+  // Format remaining time for display
+  const formatRemainingTime = (milliseconds: number) => {
+    if (!milliseconds) return "—";
+    
+    const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${hours} ساعة ${minutes} دقيقة`;
+  };
+
   const sortedCards = [...cards].sort((a, b) => {
     // Sort by activation status (active first)
     if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
+    
+    // Then sort by cards with remaining time
+    if ((a.remainingTime && a.remainingTime > 0) !== (b.remainingTime && b.remainingTime > 0)) {
+      return (a.remainingTime && a.remainingTime > 0) ? -1 : 1;
+    }
     
     // Then sort by creation date (newest first)
     const aId = parseInt(a.id.split('-')[0]);
     const bId = parseInt(b.id.split('-')[0]);
     return bId - aId;
   });
-  
+
+  // Pagination
+  const indexOfLastCard = currentPage * cardsPerPage;
+  const indexOfFirstCard = indexOfLastCard - cardsPerPage;
+  const currentCards = sortedCards.slice(indexOfFirstCard, indexOfLastCard);
+  const totalPages = Math.ceil(sortedCards.length / cardsPerPage);
+
   // Create the App sidebar component
   const AppSidebar = () => {
     return (
@@ -143,7 +227,7 @@ const CardManagementContent = () => {
         <SidebarHeader>
           <div className="flex items-center space-x-2 p-4">
             <div className="bg-white p-1 rounded-full">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
                 <div className="relative">
                   <div className="w-4 h-4 bg-white rounded-full opacity-70 animate-pulse-slow"></div>
                 </div>
@@ -193,13 +277,13 @@ const CardManagementContent = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex bg-background">
+      <div className="min-h-screen flex bg-gradient-to-br from-slate-50 to-slate-100">
         <AppSidebar />
         
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Admin Header */}
-          <header className="bg-gradient-to-r from-primary to-accent/80 text-white p-4 shadow-lg z-10">
+          <header className="bg-gradient-to-r from-teal-600 to-emerald-500 text-white p-4 shadow-lg z-10">
             <div className="container mx-auto flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <SidebarTrigger className="text-white hover:bg-white/20 hover:text-white" />
@@ -219,7 +303,7 @@ const CardManagementContent = () => {
               <p className="text-muted-foreground">إنشاء وإدارة بطاقات شبكة الحاج نت</p>
             </div>
 
-            <Tabs defaultValue="create" className="w-full">
+            <Tabs defaultValue="manage" className="w-full">
               <TabsList className="mb-4">
                 <TabsTrigger value="create">إنشاء كروت جديدة</TabsTrigger>
                 <TabsTrigger value="manage">إدارة الكروت الحالية</TabsTrigger>
@@ -228,12 +312,12 @@ const CardManagementContent = () => {
               </TabsList>
               
               <TabsContent value="create">
-                <Card className="card-gradient">
-                  <CardHeader>
+                <Card className="border-emerald-200 shadow-md overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10">
                     <CardTitle>إنشاء كروت جديدة</CardTitle>
                     <CardDescription>قم بإنشاء كروت جديدة لشبكة الحاج نت</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 pt-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="cardValue">قيمة الكرت</Label>
@@ -262,14 +346,14 @@ const CardManagementContent = () => {
                       </div>
                     </div>
                     
-                    <Button onClick={handleCreateCards} className="w-full bg-accent hover:bg-primary/90">
+                    <Button onClick={handleCreateCards} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
                       <PlusCircle className="mr-2 h-4 w-4" />
                       إنشاء الكروت
                     </Button>
                     
-                    <div className="border p-4 rounded-lg mt-6 bg-accent/10 shadow-sm">
-                      <h3 className="font-medium text-primary mb-2">معلومات الكروت</h3>
-                      <ul className="space-y-2 text-sm text-muted-foreground">
+                    <div className="border p-4 rounded-lg mt-6 bg-emerald-50 shadow-sm">
+                      <h3 className="font-medium text-emerald-800 mb-2">معلومات الكروت</h3>
+                      <ul className="space-y-2 text-sm text-emerald-700">
                         <li>• كرت 200 ريال: صالح لمدة يوم واحد (24 ساعة)</li>
                         <li>• كرت 500 ريال: صالح لمدة ثلاثة أيام (72 ساعة)</li>
                         <li>• كرت 1000 ريال: صالح لمدة أسبوع كامل (168 ساعة)</li>
@@ -280,56 +364,115 @@ const CardManagementContent = () => {
               </TabsContent>
               
               <TabsContent value="manage">
-                <Card className="card-gradient">
-                  <CardHeader>
+                <Card className="border-emerald-200 shadow-md overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10">
                     <CardTitle>إدارة الكروت الحالية</CardTitle>
                     <CardDescription>جميع الكروت المتوفرة في النظام</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {cards.length > 0 ? (
                       <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b">
-                              <th className="text-right py-3 px-2 font-medium">الرقم التسلسلي</th>
-                              <th className="text-right py-3 px-2 font-medium">القيمة</th>
-                              <th className="text-right py-3 px-2 font-medium">المدة</th>
-                              <th className="text-right py-3 px-2 font-medium">الحالة</th>
-                              <th className="text-right py-3 px-2 font-medium">تاريخ التفعيل</th>
-                              <th className="text-right py-3 px-2 font-medium">تاريخ الانتهاء</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {sortedCards.slice(0, 10).map((card) => (
-                              <tr key={card.id} className="border-b hover:bg-background">
-                                <td className="py-3 px-2">{card.serialNumber}</td>
-                                <td className="py-3 px-2">{card.value} ريال</td>
-                                <td className="py-3 px-2">{card.durationHours} ساعة</td>
-                                <td className="py-3 px-2">
-                                  <span className={`px-2 py-1 rounded text-xs ${card.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                                    {card.isActive ? 'مفعّل' : 'غير مفعّل'}
-                                  </span>
-                                </td>
-                                <td className="py-3 px-2">
-                                  {card.activatedAt 
-                                    ? format(new Date(card.activatedAt), 'yyyy-MM-dd HH:mm') 
-                                    : '—'}
-                                </td>
-                                <td className="py-3 px-2">
-                                  {card.expiresAt 
-                                    ? format(new Date(card.expiresAt), 'yyyy-MM-dd HH:mm') 
-                                    : '—'}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-right">الرقم التسلسلي</TableHead>
+                              <TableHead className="text-right">القيمة</TableHead>
+                              <TableHead className="text-right">المدة</TableHead>
+                              <TableHead className="text-right">الحالة</TableHead>
+                              <TableHead className="text-right">الوقت المتبقي</TableHead>
+                              <TableHead className="text-right">تاريخ التفعيل</TableHead>
+                              <TableHead className="text-right">تاريخ الانتهاء</TableHead>
+                              <TableHead className="text-right">إجراءات</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {currentCards.map((card) => {
+                              const statusInfo = getCardStatusInfo(card);
+                              return (
+                                <TableRow key={card.id} className="hover:bg-emerald-50/50">
+                                  <TableCell>{card.serialNumber}</TableCell>
+                                  <TableCell>{card.value} ريال</TableCell>
+                                  <TableCell>{card.durationHours} ساعة</TableCell>
+                                  <TableCell>
+                                    <span className={`px-2 py-1 rounded text-xs ${statusInfo.className}`}>
+                                      {statusInfo.text}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    {card.remainingTime ? formatRemainingTime(card.remainingTime) : '—'}
+                                  </TableCell>
+                                  <TableCell>
+                                    {card.activatedAt 
+                                      ? format(new Date(card.activatedAt), 'yyyy-MM-dd HH:mm') 
+                                      : '—'}
+                                  </TableCell>
+                                  <TableCell>
+                                    {card.expiresAt 
+                                      ? format(new Date(card.expiresAt), 'yyyy-MM-dd HH:mm') 
+                                      : '—'}
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="flex space-x-2">
+                                      {card.isActive && (
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          onClick={() => handleCardLogout(card.serialNumber)}
+                                          className="text-amber-600 border-amber-600 hover:bg-amber-50"
+                                          title="تسجيل الخروج"
+                                        >
+                                          <LogOut className="h-4 w-4" />
+                                        </Button>
+                                      )}
+                                      {!card.isActive && card.remainingTime && card.remainingTime > 0 && (
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          onClick={() => handleCardReactivate(card.serialNumber)}
+                                          className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+                                          title="إعادة التفعيل"
+                                        >
+                                          <RefreshCcw className="h-4 w-4" />
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
                         
-                        {cards.length > 10 && (
-                          <div className="text-center mt-4 text-muted-foreground">
-                            تم عرض 10 كروت من أصل {cards.length}
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                          <div className="flex justify-center items-center mt-4 space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                              disabled={currentPage === 1}
+                              className="text-emerald-600"
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                            <span className="text-sm text-muted-foreground px-2">
+                              صفحة {currentPage} من {totalPages}
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                              disabled={currentPage === totalPages}
+                              className="text-emerald-600"
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </Button>
                           </div>
                         )}
+                        
+                        <div className="text-center mt-4 text-muted-foreground">
+                          إجمالي عدد الكروت: {cards.length}
+                        </div>
                       </div>
                     ) : (
                       <div className="text-center py-8">
@@ -349,19 +492,19 @@ const CardManagementContent = () => {
               </TabsContent>
               
               <TabsContent value="search">
-                <Card className="card-gradient">
-                  <CardHeader>
+                <Card className="border-emerald-200 shadow-md overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10">
                     <CardTitle>بحث عن كرت</CardTitle>
                     <CardDescription>ابحث عن كرت باستخدام الرقم التسلسلي أو القيمة</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 pt-6">
                     <div className="flex gap-2">
                       <Input
                         placeholder="ابحث عن كرت..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
-                      <Button onClick={handleSearchCards} className="bg-accent hover:bg-accent/90">
+                      <Button onClick={handleSearchCards} className="bg-emerald-600 hover:bg-emerald-700 text-white">
                         <Search className="mr-2 h-4 w-4" />
                         بحث
                       </Button>
@@ -369,30 +512,64 @@ const CardManagementContent = () => {
                     
                     {filteredCards.length > 0 ? (
                       <div className="overflow-x-auto mt-4">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b">
-                              <th className="text-right py-3 px-2 font-medium">الرقم التسلسلي</th>
-                              <th className="text-right py-3 px-2 font-medium">القيمة</th>
-                              <th className="text-right py-3 px-2 font-medium">المدة</th>
-                              <th className="text-right py-3 px-2 font-medium">الحالة</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {filteredCards.map((card) => (
-                              <tr key={card.id} className="border-b hover:bg-background">
-                                <td className="py-3 px-2">{card.serialNumber}</td>
-                                <td className="py-3 px-2">{card.value} ريال</td>
-                                <td className="py-3 px-2">{card.durationHours} ساعة</td>
-                                <td className="py-3 px-2">
-                                  <span className={`px-2 py-1 rounded text-xs ${card.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                                    {card.isActive ? 'مفعّل' : 'غير مفعّل'}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-right">الرقم التسلسلي</TableHead>
+                              <TableHead className="text-right">القيمة</TableHead>
+                              <TableHead className="text-right">المدة</TableHead>
+                              <TableHead className="text-right">الحالة</TableHead>
+                              <TableHead className="text-right">الوقت المتبقي</TableHead>
+                              <TableHead className="text-right">إجراءات</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {filteredCards.map((card) => {
+                              const statusInfo = getCardStatusInfo(card);
+                              return (
+                                <TableRow key={card.id} className="hover:bg-emerald-50/50">
+                                  <TableCell>{card.serialNumber}</TableCell>
+                                  <TableCell>{card.value} ريال</TableCell>
+                                  <TableCell>{card.durationHours} ساعة</TableCell>
+                                  <TableCell>
+                                    <span className={`px-2 py-1 rounded text-xs ${statusInfo.className}`}>
+                                      {statusInfo.text}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    {card.remainingTime ? formatRemainingTime(card.remainingTime) : '—'}
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="flex space-x-2">
+                                      {card.isActive && (
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          onClick={() => handleCardLogout(card.serialNumber)}
+                                          className="text-amber-600 border-amber-600 hover:bg-amber-50"
+                                          title="تسجيل الخروج"
+                                        >
+                                          <LogOut className="h-4 w-4" />
+                                        </Button>
+                                      )}
+                                      {!card.isActive && card.remainingTime && card.remainingTime > 0 && (
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          onClick={() => handleCardReactivate(card.serialNumber)}
+                                          className="text-emerald-600 border-emerald-600 hover:bg-emerald-50"
+                                          title="إعادة التفعيل"
+                                        >
+                                          <RefreshCcw className="h-4 w-4" />
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
                       </div>
                     ) : searchQuery ? (
                       <div className="text-center py-4">
@@ -404,14 +581,14 @@ const CardManagementContent = () => {
               </TabsContent>
               
               <TabsContent value="auto">
-                <Card className="card-gradient">
-                  <CardHeader>
+                <Card className="border-emerald-200 shadow-md overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10">
                     <CardTitle>الإنشاء التلقائي للكروت</CardTitle>
                     <CardDescription>إنشاء كروت بشكل تلقائي كل 10 ثوان</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-col gap-4">
-                      <div className="flex items-center space-x-4 p-4 border rounded-lg bg-accent/10">
+                      <div className="flex items-center space-x-4 p-4 border rounded-lg bg-emerald-50">
                         <div className="flex-1">
                           <h4 className="font-medium">الإنشاء التلقائي للكروت</h4>
                           <p className="text-sm text-muted-foreground">
@@ -421,7 +598,7 @@ const CardManagementContent = () => {
                         <Button 
                           variant={autoGenerateEnabled ? "destructive" : "default"}
                           onClick={() => setAutoGenerateEnabled(!autoGenerateEnabled)}
-                          className={autoGenerateEnabled ? "" : "bg-emerald-500 hover:bg-emerald-600 text-white"}
+                          className={autoGenerateEnabled ? "" : "bg-emerald-600 hover:bg-emerald-700 text-white"}
                         >
                           {autoGenerateEnabled ? "إيقاف" : "تفعيل"}
                         </Button>
