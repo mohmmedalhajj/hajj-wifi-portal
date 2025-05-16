@@ -14,28 +14,32 @@ import AdminDashboard from "./pages/AdminDashboard";
 import CardManagement from "./pages/CardManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/user-login" element={<UserLogin />} />
-            <Route path="/admin-login" element={<AdminLogin />} />
-            <Route path="/card-check" element={<CardCheck />} />
-            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-            <Route path="/admin/card-management" element={<ProtectedRoute><CardManagement /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+// Create a new QueryClient inside the component
+const App = () => {
+  // Initialize QueryClient inside the component
+  const queryClient = new QueryClient();
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/user-login" element={<UserLogin />} />
+              <Route path="/admin-login" element={<AdminLogin />} />
+              <Route path="/card-check" element={<CardCheck />} />
+              <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin/card-management" element={<ProtectedRoute><CardManagement /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

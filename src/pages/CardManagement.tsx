@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -60,7 +59,8 @@ const CardManagementContent = () => {
       // Generate a card every 10 seconds when enabled
       const intervalId = window.setInterval(() => {
         const randomValue = ["200", "500", "1000"][Math.floor(Math.random() * 3)] as "200" | "500" | "1000";
-        addCard(parseInt(randomValue), 1);
+        // Convert string to number using parseInt, then cast to allowed type
+        addCard(parseInt(randomValue) as 200 | 500 | 1000, 1);
         
         toast({
           title: "تم إنشاء كرت جديد تلقائيًا",
