@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --background: 226 100% 98%;
+    --background: 216 100% 98%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -14,52 +14,52 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 240 79% 54%;
-    --primary-foreground: 240 100% 98%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 260 100% 98%;
 
-    --secondary: 240 88% 82%;
+    --secondary: 262 88% 85%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 240 40% 96.1%;
+    --muted: 262 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 240 84% 58%;
+    --accent: 151 84% 58%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 240 40% 98%;
+    --destructive-foreground: 262 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 240 79% 54%;
+    --ring: 262 79% 54%;
 
     --radius: 0.75rem;
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
-    --foreground: 240 40% 98%;
+    --foreground: 262 40% 98%;
 
     --card: 222.2 84% 4.9%;
-    --card-foreground: 240 40% 98%;
+    --card-foreground: 262 40% 98%;
 
     --popover: 222.2 84% 4.9%;
-    --popover-foreground: 240 40% 98%;
+    --popover-foreground: 262 40% 98%;
 
-    --primary: 240 40% 98%;
+    --primary: 262 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 240 40% 98%;
+    --secondary-foreground: 262 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 240 40% 98%;
+    --accent: 151 73% 42%;
+    --accent-foreground: 262 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 240 40% 98%;
+    --destructive-foreground: 262 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
@@ -79,11 +79,11 @@
 
 @layer components {
   .card-gradient {
-    @apply bg-gradient-to-br from-white to-muted shadow-md hover:shadow-lg transition-shadow duration-300;
+    @apply bg-gradient-to-br from-white to-secondary/30 shadow-md hover:shadow-lg transition-shadow duration-300;
   }
   
   .admin-header {
-    @apply bg-gradient-to-r from-wifi-dark to-wifi-accent text-white shadow-lg;
+    @apply bg-gradient-to-r from-primary to-accent text-white shadow-lg;
   }
   
   .sidebar-link {
@@ -91,10 +91,31 @@
   }
   
   .sidebar-link.active {
-    @apply bg-wifi-light text-wifi-accent font-medium;
+    @apply bg-secondary text-primary font-medium;
   }
   
   .sidebar-link:not(.active) {
-    @apply hover:bg-gray-100 text-gray-700;
+    @apply hover:bg-muted text-foreground/70;
+  }
+  
+  /* Animations */
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
   }
 }
+

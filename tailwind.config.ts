@@ -54,11 +54,11 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				wifi: {
-					primary: '#6366f1', // Updated to indigo-500
-					secondary: '#a5b4fc', // Updated to indigo-300
-					accent: '#4f46e5', // Updated to indigo-600
-					light: '#eef2ff', // Updated to indigo-50
-					dark: '#3730a3' // Updated to indigo-800
+					primary: '#8b5cf6', // Updated to purple-500
+					secondary: '#c4b5fd', // Updated to purple-300
+					accent: '#10b981', // Updated to emerald-500
+					light: '#f5f3ff', // Updated to purple-50
+					dark: '#6d28d9' // Updated to purple-700
 				},
 				price: {
 					200: '#10b981', // Updated to emerald-500
@@ -99,6 +99,10 @@ export default {
 				'slide-out': {
 					'0%': { transform: 'translateX(0)' },
 					'100%': { transform: 'translateX(-100%)' }
+				},
+				'fade-in': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' }
 				}
 			},
 			animation: {
@@ -106,12 +110,13 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'pulse-slow': 'pulse-slow 3s ease-in-out infinite',
 				'slide-in': 'slide-in 0.3s ease-out',
-				'slide-out': 'slide-out 0.3s ease-out'
+				'slide-out': 'slide-out 0.3s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out'
 			},
 			backgroundImage: {
-				'wifi-pattern': "url(\"data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236366f1' fill-opacity='0.08'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+				'wifi-pattern': "url(\"data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%238b5cf6' fill-opacity='0.08'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-				'gradient-soft': 'linear-gradient(to right, #eef2ff, #dbeafe)',
+				'gradient-soft': 'linear-gradient(to right, #f5f3ff, #dbeafe)',
 			}
 		}
 	},
