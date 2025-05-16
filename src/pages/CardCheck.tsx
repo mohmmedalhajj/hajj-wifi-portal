@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { CardProvider, useCards, CardType } from "../context/CardContext";
-import { CreditCard, Clock, Coins, Calendar } from "lucide-react";
+import { CreditCard, Clock, Coins, Calendar, LogOut } from "lucide-react";
 import { format } from "date-fns";
 
 // Wrap this component with CardProvider in App.tsx
@@ -15,7 +15,8 @@ const CardCheckContent = () => {
   const [serialNumber, setSerialNumber] = useState("");
   const [cardInfo, setCardInfo] = useState<CardType | null>(null);
   const [isActivating, setIsActivating] = useState(false);
-  const { checkCard, activateCard } = useCards();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { checkCard, activateCard, logoutCard } = useCards();
   const { toast } = useToast();
 
   const handleCheck = () => {
@@ -62,6 +63,28 @@ const CardCheckContent = () => {
     setIsActivating(false);
   };
 
+  const handleLogout = () => {
+    if (!cardInfo) return;
+
+    setIsLoggingOut(true);
+    const loggedOutCard = logoutCard(cardInfo.serialNumber);
+
+    if (loggedOutCard) {
+      setCardInfo(loggedOutCard);
+      toast({
+        title: "تم تسجيل الخروج بنجاح",
+        description: `تم حفظ الوقت المتبقي للكرت: ${formatRemainingTimeMs(loggedOutCard.remainingTime || 0)}`,
+      });
+    } else {
+      toast({
+        title: "فشل تسجيل الخروج",
+        description: "لم يتم تسجيل الخروج من الكرت",
+        variant: "destructive",
+      });
+    }
+    setIsLoggingOut(false);
+  };
+
   const calculateRemainingTime = () => {
     if (!cardInfo?.isActive || !cardInfo?.expiresAt) return null;
     
@@ -75,6 +98,13 @@ const CardCheckContent = () => {
     const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
     
     return `${diffHrs} ساعة و ${diffMins} دقيقة`;
+  };
+
+  // Format remaining time from milliseconds
+  const formatRemainingTimeMs = (ms: number) => {
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours} ساعة و ${minutes} دقيقة`;
   };
 
   return (
@@ -166,18 +196,45 @@ const CardCheckContent = () => {
                         {calculateRemainingTime()}
                       </span>
                     </div>
+
+                    <Button 
+                      onClick={handleLogout}
+                      className="mt-4 w-full bg-amber-500 hover:bg-amber-600"
+                      disabled={isLoggingOut}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      {isLoggingOut ? "جاري تسجيل الخروج..." : "تسجيل الخروج"}
+                    </Button>
                   </>
                 )}
               </div>
               
               {!cardInfo.isActive && (
-                <Button 
-                  onClick={handleActivate} 
-                  className="mt-4 w-full"
-                  disabled={isActivating}
-                >
-                  {isActivating ? "جاري التفعيل..." : "تفعيل الكرت"}
-                </Button>
+                <>
+                  {cardInfo.remainingTime && cardInfo.remainingTime > 0 ? (
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-sm text-blue-800 mb-2">
+                        <Clock className="inline mr-1 h-4 w-4" />
+                        هذا الكرت لديه رصيد متبقي: {formatRemainingTimeMs(cardInfo.remainingTime)}
+                      </p>
+                      <Button 
+                        onClick={handleActivate} 
+                        className="w-full bg-green-500 hover:bg-green-600"
+                        disabled={isActivating}
+                      >
+                        {isActivating ? "جاري إعادة التفعيل..." : "إعادة تفعيل الكرت"}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button 
+                      onClick={handleActivate} 
+                      className="mt-4 w-full"
+                      disabled={isActivating}
+                    >
+                      {isActivating ? "جاري التفعيل..." : "تفعيل الكرت"}
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           )}
