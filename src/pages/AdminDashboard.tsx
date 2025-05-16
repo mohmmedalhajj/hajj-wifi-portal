@@ -13,7 +13,9 @@ import {
   PlusCircle, 
   Package, 
   CheckCircle, 
-  XCircle 
+  XCircle,
+  ChevronLeft,
+  Menu
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -22,6 +24,7 @@ const DashboardContent = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { cards } = useCards();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -55,13 +58,17 @@ const DashboardContent = () => {
     navigate("/");
   };
 
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
   // Get last 5 cards for recent activity
   const recentCards = cards.slice(-5).reverse();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-soft">
       {/* Admin Header */}
-      <header className="bg-wifi-dark text-white p-4 shadow-md">
+      <header className="admin-header p-4">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <div className="bg-white p-1 rounded-full">
@@ -86,22 +93,34 @@ const DashboardContent = () => {
       {/* Admin Sidebar and Content */}
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-white h-[calc(100vh-64px)] shadow-md p-4 fixed left-0">
-          <nav className="space-y-2">
-            <Link to="/admin" className="flex items-center p-3 rounded-lg bg-wifi-light text-wifi-primary font-medium">
-              <LayoutDashboard size={18} className="mr-2" /> لوحة التحكم
+        <aside className={`bg-white h-[calc(100vh-64px)] shadow-lg p-4 fixed left-0 z-10 transition-all duration-300 ease-in-out ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleSidebar} 
+            className="absolute -right-4 top-6 bg-white rounded-full shadow-md h-8 w-8"
+          >
+            {sidebarCollapsed ? <Menu size={16} /> : <ChevronLeft size={16} />}
+          </Button>
+          
+          <nav className="space-y-2 mt-6">
+            <Link to="/admin" className="sidebar-link active">
+              <LayoutDashboard size={18} className="mr-2" /> 
+              {!sidebarCollapsed && <span>لوحة التحكم</span>}
             </Link>
-            <Link to="/admin/card-management" className="flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-700">
-              <CreditCard size={18} className="mr-2" /> إدارة الكروت
+            <Link to="/admin/card-management" className="sidebar-link">
+              <CreditCard size={18} className="mr-2" /> 
+              {!sidebarCollapsed && <span>إدارة الكروت</span>}
             </Link>
-            <Link to="/" className="flex items-center p-3 rounded-lg hover:bg-gray-100 text-gray-700">
-              <Home size={18} className="mr-2" /> الصفحة الرئيسية
+            <Link to="/" className="sidebar-link">
+              <Home size={18} className="mr-2" /> 
+              {!sidebarCollapsed && <span>الصفحة الرئيسية</span>}
             </Link>
           </nav>
         </aside>
 
         {/* Main Content */}
-        <main className="ml-64 p-6 flex-1">
+        <main className={`p-6 transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'} flex-1`}>
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-800">لوحة التحكم</h2>
             <p className="text-gray-600">نظرة عامة على بطاقات الشبكة والإحصائيات</p>
@@ -109,7 +128,7 @@ const DashboardContent = () => {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
+            <Card className="card-gradient">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="bg-blue-100 p-3 rounded-full">
@@ -123,7 +142,7 @@ const DashboardContent = () => {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="card-gradient">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="bg-green-100 p-3 rounded-full">
@@ -137,7 +156,7 @@ const DashboardContent = () => {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="card-gradient">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="bg-amber-100 p-3 rounded-full">
@@ -151,11 +170,11 @@ const DashboardContent = () => {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="card-gradient">
               <CardContent className="p-6">
                 <div className="flex justify-center items-center h-full">
                   <Link to="/admin/card-management">
-                    <Button>
+                    <Button className="bg-wifi-primary hover:bg-wifi-accent text-white">
                       <PlusCircle className="mr-2 h-4 w-4" /> إنشاء كروت جديدة
                     </Button>
                   </Link>
@@ -166,7 +185,7 @@ const DashboardContent = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Card Inventory */}
-            <Card className="col-span-2">
+            <Card className="col-span-2 card-gradient">
               <CardHeader>
                 <CardTitle>مخزون الكروت</CardTitle>
                 <CardDescription>توزيع الكروت حسب القيمة</CardDescription>
@@ -199,7 +218,7 @@ const DashboardContent = () => {
             </Card>
 
             {/* Recent Activity */}
-            <Card>
+            <Card className="card-gradient">
               <CardHeader>
                 <CardTitle>النشاط الأخير</CardTitle>
                 <CardDescription>آخر 5 كروت تم إنشاؤها</CardDescription>
