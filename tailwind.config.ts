@@ -54,16 +54,16 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				wifi: {
-					primary: '#8b5cf6', // Updated to purple-500
-					secondary: '#c4b5fd', // Updated to purple-300
-					accent: '#10b981', // Updated to emerald-500
-					light: '#f5f3ff', // Updated to purple-50
-					dark: '#6d28d9' // Updated to purple-700
+					primary: '#dc2626', // red-600
+					secondary: '#fca5a5', // red-300
+					accent: '#000000', // black
+					light: '#fef2f2', // red-50
+					dark: '#991b1b' // red-800
 				},
 				price: {
-					200: '#10b981', // Updated to emerald-500
-					500: '#f59e0b', // Updated to amber-500
-					1000: '#ef4444', // Updated to red-500
+					200: '#dc2626', // red-600
+					500: '#000000', // black
+					1000: '#991b1b', // red-800
 				}
 			},
 			borderRadius: {
@@ -114,9 +114,9 @@ export default {
 				'fade-in': 'fade-in 0.5s ease-out'
 			},
 			backgroundImage: {
-				'wifi-pattern': "url(\"data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%238b5cf6' fill-opacity='0.08'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+				'wifi-pattern': "url(\"data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23dc2626' fill-opacity='0.08'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-				'gradient-soft': 'linear-gradient(to right, #f5f3ff, #dbeafe)',
+				'gradient-soft': 'linear-gradient(to right, #fef2f2, #ffffff)',
 			}
 		}
 	},
